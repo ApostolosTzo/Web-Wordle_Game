@@ -14,7 +14,6 @@ The game validates guesses against a dictionary of over 12,000 words to ensure g
 
 A fully functional, web-based clone of the popular game **Wordle**, featuring a global leaderboard and a speed-run timer.
 
-### 🔗 **Play the Live Game:** [https://wordle-web-d8405.firebaseapp.com/](https://wordle-web-d8405.firebaseapp.com/)
 
 ---
 
