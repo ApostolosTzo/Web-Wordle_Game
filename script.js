@@ -295,32 +295,54 @@ async function saveScore(name, timeVal) {
 
 async function loadLeaderboard() {
     const tbody = document.getElementById("leaderboard-body");
-    tbody.innerHTML = "<tr><td colspan='4'>Loading from Firebase...</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='3'>Loading from Firebase...</td></tr>";
 
-    const q = query(collection(db, "placemate"), orderBy("time"), limit(10));
+    // Grouping by date
+    const q = query(collection(db, "placemate"), orderBy("date", "desc"));
     try {
         const querySnapshot = await getDocs(q);
         tbody.innerHTML = "";
         if (querySnapshot.empty) {
-            tbody.innerHTML = "<tr><td colspan='4'>No records yet.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='3'>No records yet.</td></tr>";
             return;
         }
-        let rank = 1;
+        
+        // Group entries by date
+        const groupedByDate = {};
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             let dateStr = "-";
             if (data.date) dateStr = data.date.split('T')[0];
-            const row = `<tr>
-                <td>${rank++}</td>
-                <td>${data.name}</td>
-                <td>${data.time.toFixed(2)}</td>
-                <td>${dateStr}</td>
-            </tr>`;
-            tbody.innerHTML += row;
+            if (!groupedByDate[dateStr]) {
+                groupedByDate[dateStr] = [];
+            }
+            groupedByDate[dateStr].push(data);
         });
+        
+        // Sort entries within each date by time
+        for (const date in groupedByDate) {
+            groupedByDate[date].sort((a, b) => a.time - b.time);
+        }
+        
+        // Render grouped leaderboard
+        for (const date in groupedByDate) {
+            // Date header row
+            tbody.innerHTML += `<tr class="date-header"><td colspan='3'><strong>${date}</strong></td></tr>`;
+            
+            // Entries for this date
+            let rank = 1;
+            groupedByDate[date].forEach((data) => {
+                const row = `<tr>
+                    <td>${rank++}</td>
+                    <td>${data.name}</td>
+                    <td>${data.time.toFixed(2)}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
     } catch (e) {
         console.error("Error loading leaderboard:", e);
-        tbody.innerHTML = "<tr><td colspan='4'>Error loading data.</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='3'>Error loading data.</td></tr>";
     }
 }
 
