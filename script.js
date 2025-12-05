@@ -58,7 +58,7 @@ document.getElementById("btn-leaderboard").addEventListener("click", () => {
 
 document.getElementById("btn-exit").addEventListener("click", () => {
     alert("Goodbye! (Close the tab to exit)");
-    location.reload(); 
+    location.reload();
 });
 
 document.getElementById("btn-name-back").addEventListener("click", () => showScreen("screen-menu"));
@@ -67,32 +67,38 @@ document.getElementById("btn-lb-back").addEventListener("click", () => showScree
 
 // Enter Key Logic
 document.getElementById("btn-join").addEventListener("click", () => startGame());
-nameInput.addEventListener("keydown", (e) => { if(e.key === "Enter") startGame(); });
+nameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") startGame(); });
 
 document.getElementById("guess-btn").addEventListener("click", handleGuess);
-guessInput.addEventListener("keydown", (e) => { if(e.key === "Enter") handleGuess(); });
+guessInput.addEventListener("keydown", (e) => { if (e.key === "Enter") handleGuess(); });
 
 
 // --- DATA LOADING ---
 async function fetchWordLists() {
     try {
         const [answersResponse, guessesResponse] = await Promise.all([
-            fetch('words.txt'),
-            fetch('All_the_Words.txt')
+            fetch('./words.txt'),
+            fetch('./All_the_Words.txt')
         ]);
-        
-        if (!answersResponse.ok || !guessesResponse.ok) throw new Error("Files not found");
+
+        if (!answersResponse.ok || !guessesResponse.ok) {
+            throw new Error(`Files not found - answers: ${answersResponse.ok}, guesses: ${guessesResponse.ok}`);
+        }
 
         const answersText = await answersResponse.text();
         const guessesText = await guessesResponse.text();
 
-        answerList = answersText.split('\n').map(w => w.trim().toLowerCase()).filter(w => w.length === 5);
-        validGuessList = guessesText.split('\n').map(w => w.trim().toLowerCase()).filter(w => w.length === 5);
-        
-        console.log("Words loaded.");
+        answerList = answersText.split('\n').map(w => w.trim().toLowerCase()).filter(w => w && w.length === 5);
+        validGuessList = guessesText.split('\n').map(w => w.trim().toLowerCase()).filter(w => w && w.length === 5);
+
+        console.log(`Loaded ${answerList.length} answer words and ${validGuessList.length} valid guess words.`);
+
+        if (answerList.length === 0 || validGuessList.length === 0) {
+            throw new Error("No valid words found");
+        }
     } catch (error) {
-        console.error(error);
-        alert("Error loading word lists.");
+        console.error("Error loading word lists:", error);
+        alert("Error loading word lists. Make sure words.txt and All_the_Words.txt exist in the same directory.");
     }
 }
 
@@ -109,25 +115,25 @@ function initKeyboard() {
         return;
     }
 
-    keyboardContainer.innerHTML = ""; 
-    
+    keyboardContainer.innerHTML = "";
+
     keysLayout.forEach(row => {
         const rowDiv = document.createElement("div");
         rowDiv.className = "keyboard-row";
-        
+
         row.forEach(char => {
             const btn = document.createElement("button");
             btn.textContent = char;
             btn.className = "key-btn";
             btn.id = `key-${char}`;
-            
+
             btn.addEventListener("click", () => {
                 if (!gameOver && guessInput.value.length < 5) {
                     guessInput.value += char;
                     guessInput.focus();
                 }
             });
-            
+
             rowDiv.appendChild(btn);
         });
         keyboardContainer.appendChild(rowDiv);
@@ -137,13 +143,13 @@ function initKeyboard() {
 function updateKeyboardColors(guess, feedback) {
     for (let i = 0; i < 5; i++) {
         const char = guess[i].toUpperCase();
-        const color = feedback[i]; 
+        const color = feedback[i];
         const keyBtn = document.getElementById(`key-${char}`);
-        
+
         if (keyBtn) {
             const currentColor = keyBtn.classList.contains("correct") ? "correct" :
-                                 keyBtn.classList.contains("present") ? "present" : 
-                                 keyBtn.classList.contains("absent") ? "absent" : "";
+                keyBtn.classList.contains("present") ? "present" :
+                    keyBtn.classList.contains("absent") ? "absent" : "";
 
             if (color === "correct") {
                 keyBtn.className = `key-btn correct`;
@@ -166,15 +172,15 @@ function startGame() {
 
     playerName = nameInput.value.trim() || "Anonymous";
     targetWord = answerList[Math.floor(Math.random() * answerList.length)];
-    
+
     currentAttempt = 0;
     gameOver = false;
     guessInput.value = "";
     guessInput.disabled = false;
     messageEl.textContent = "";
     board.innerHTML = "";
-    
-    initKeyboard(); 
+
+    initKeyboard();
 
     for (let i = 0; i < ATTEMPTS * 5; i++) {
         const tile = document.createElement("div");
@@ -198,19 +204,19 @@ async function handleGuess() {
     if (gameOver) return;
 
     const guess = guessInput.value.toLowerCase().trim();
-    
+
     if (guess.length !== 5) {
         messageEl.textContent = "Please enter exactly 5 letters.";
         return;
     }
-    
-    if (!validGuessList.includes(guess) && !answerList.includes(guess)) { 
-        messageEl.textContent = "Word not in list."; 
-        return; 
+
+    if (!validGuessList.includes(guess) && !answerList.includes(guess)) {
+        messageEl.textContent = "Word not in list.";
+        return;
     }
 
-    messageEl.textContent = ""; 
-    
+    messageEl.textContent = "";
+
     const feedback = getFeedback(guess, targetWord);
     renderFeedback(guess, feedback, currentAttempt);
     updateKeyboardColors(guess, feedback);
@@ -231,7 +237,7 @@ async function handleGuess() {
 function getFeedback(guess, target) {
     let feedback = new Array(5).fill("absent");
     let targetChars = target.split("");
-    
+
     for (let i = 0; i < 5; i++) {
         if (guess[i] === target[i]) {
             feedback[i] = "correct";
@@ -262,14 +268,14 @@ async function endGame(won) {
     gameOver = true;
     guessInput.disabled = true;
     const elapsed = (performance.now() - startTime) / 1000;
-    
+
     if (won) {
         messageEl.textContent = `Correct! Time: ${elapsed.toFixed(2)}s`;
         messageEl.style.color = "green";
         await saveScore(playerName, elapsed);
         setTimeout(() => {
             alert(`Correct! \nYour Time: ${elapsed.toFixed(2)}s`);
-            showScreen("screen-menu"); 
+            showScreen("screen-menu");
         }, 1000);
     } else {
         messageEl.textContent = `Out of tries! Word: ${targetWord.toUpperCase()}`;
@@ -295,32 +301,56 @@ async function saveScore(name, timeVal) {
 
 async function loadLeaderboard() {
     const tbody = document.getElementById("leaderboard-body");
-    tbody.innerHTML = "<tr><td colspan='4'>Loading from Firebase...</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='3'>Loading from Firebase...</td></tr>";
 
-    const q = query(collection(db, "placemate"), orderBy("time"), limit(10));
+    //Grouping by data
+    const q = query(collection(db, "placemate"), orderBy('date', "desc"));
     try {
         const querySnapshot = await getDocs(q);
         tbody.innerHTML = "";
         if (querySnapshot.empty) {
-            tbody.innerHTML = "<tr><td colspan='4'>No records yet.</td></tr>";
+            tbody.innerHTML = "<tr><td colspan='3'>No records yet.</td></tr>";
             return;
         }
-        let rank = 1;
+
+
+        //Grouping entries by data
+        const groupedByData = {};
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             let dateStr = "-";
             if (data.date) dateStr = data.date.split('T')[0];
-            const row = `<tr>
-                <td>${rank++}</td>
-                <td>${data.name}</td>
-                <td>${data.time.toFixed(2)}</td>
-                <td>${dateStr}</td>
-            </tr>`;
-            tbody.innerHTML += row;
+            if (!groupedByData[dateStr]) {
+                groupedByData[dateStr] = [];
+            }
+            groupedByData[dateStr].push(data);
         });
+
+        //Sort entries within each date by time
+        for (const date in groupedByData) {
+            groupedByData[date].sort((a, b) => a.time - b.time);
+        }
+
+        // Render grouped Leaderboard
+        for (const date in groupedByData) {
+            //Date Header row
+            tbody.innerHTML += `<tr class="date-header"><td colspan="3"><strong>${date}</strong></td></tr>`;
+
+            // Entries for this data
+            let rank = 1;
+            groupedByData[date].forEach((data) => {
+                // Entry row
+                const row = `<tr>
+                    <td>${rank++}</td>
+                    <td>${data.name}</td>
+                    <td>${data.time.toFixed(2)}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
     } catch (e) {
         console.error("Error loading leaderboard:", e);
-        tbody.innerHTML = "<tr><td colspan='4'>Error loading data.</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='3'>Error loading data.</td></tr>";
     }
 }
 
