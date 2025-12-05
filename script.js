@@ -303,8 +303,8 @@ async function loadLeaderboard() {
     const tbody = document.getElementById("leaderboard-body");
     tbody.innerHTML = "<tr><td colspan='3'>Loading from Firebase...</td></tr>";
 
-    //Grouping by data
-    const q = query(collection(db, "placemate"), orderBy('date', "desc"));
+    // Grouping by date
+    const q = query(collection(db, "placemate"), orderBy("date", "desc"));
     try {
         const querySnapshot = await getDocs(q);
         tbody.innerHTML = "";
@@ -312,34 +312,32 @@ async function loadLeaderboard() {
             tbody.innerHTML = "<tr><td colspan='3'>No records yet.</td></tr>";
             return;
         }
-
-
-        //Grouping entries by data
-        const groupedByData = {};
+        
+        // Group entries by date
+        const groupedByDate = {};
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             let dateStr = "-";
             if (data.date) dateStr = data.date.split('T')[0];
-            if (!groupedByData[dateStr]) {
-                groupedByData[dateStr] = [];
+            if (!groupedByDate[dateStr]) {
+                groupedByDate[dateStr] = [];
             }
-            groupedByData[dateStr].push(data);
+            groupedByDate[dateStr].push(data);
         });
-
-        //Sort entries within each date by time
-        for (const date in groupedByData) {
-            groupedByData[date].sort((a, b) => a.time - b.time);
+        
+        // Sort entries within each date by time
+        for (const date in groupedByDate) {
+            groupedByDate[date].sort((a, b) => a.time - b.time);
         }
-
-        // Render grouped Leaderboard
-        for (const date in groupedByData) {
-            //Date Header row
-            tbody.innerHTML += `<tr class="date-header"><td colspan="3"><strong>${date}</strong></td></tr>`;
-
-            // Entries for this data
+        
+        // Render grouped leaderboard
+        for (const date in groupedByDate) {
+            // Date header row
+            tbody.innerHTML += `<tr class="date-header"><td colspan='3'><strong>${date}</strong></td></tr>`;
+            
+            // Entries for this date
             let rank = 1;
-            groupedByData[date].forEach((data) => {
-                // Entry row
+            groupedByDate[date].forEach((data) => {
                 const row = `<tr>
                     <td>${rank++}</td>
                     <td>${data.name}</td>
