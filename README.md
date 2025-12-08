@@ -107,14 +107,6 @@ Because this project uses JavaScript Modules (`import` statements) and fetches e
 
 ---
 
-## 🏆 Leaderboard Logic
-
-The game connects to a Firestore collection named `placemate`.
-1.  When a player wins, their **Name**, **Time**, and **Date** are saved to the database.
-2.  The Leaderboard screen queries the database, sorts by time (ascending), and limits the view to the top 10 fastest players.
-
----
-
 ## 🔥 Firebase Configuration
 
 This project is pre-configured to use Firebase Firestore for the leaderboard and Firebase Hosting.
