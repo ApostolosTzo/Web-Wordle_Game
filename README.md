@@ -21,7 +21,7 @@ The game validates guesses against a dictionary of over 12,000 words to ensure g
 * [**How to Run Locally**](#-How-to-Run-Locally) - *Run locally in firebase the game.*
 * [**Firebase Configuration**](#-Firebase-Configuration) - *Commands to run the game with firebase.*
 * [**Technologies Used**](#-Technologies-Used) - *Tech stack*
-* [**Word Lists Credits**](#-Words-List-Credits) - *Words lists*
+* [**Word Lists Credits**](#-Word-Lists-Credits) - *Words lists*
 
 ---
 
