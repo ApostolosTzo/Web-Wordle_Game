@@ -15,21 +15,25 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // --- VARIABLES ---
-const ATTEMPTS = 6;
+let ATTEMPTS = 6;
 let currentAttempt = 0;
 let targetWord = "";
 let startTime = 0;
 let gameOver = false;
 let playerName = "Anonymous";
+let currentMode = "easy"; // "easy" or "medium"
 
-let answerList = [];
+let easyAnswerList = [];
+let mediumAnswerList = [];
 let validGuessList = [];
 
 // --- DOM ELEMENTS ---
 const screenMenu = document.getElementById("screen-menu");
+const screenModeSelection = document.getElementById("screen-mode-selection");
 const screenName = document.getElementById("screen-name");
 const screenGame = document.getElementById("screen-game");
 const screenLeaderboard = document.getElementById("screen-leaderboard");
+const screenLeaderboardMode = document.getElementById("screen-leaderboard-mode");
 
 const nameInput = document.getElementById("player-name-input");
 const guessInput = document.getElementById("guess-input");
@@ -41,17 +45,40 @@ const keyboardContainer = document.getElementById("keyboard-container"); // Ensu
 
 // --- NAVIGATION ---
 function showScreen(screenId) {
-    [screenMenu, screenName, screenGame, screenLeaderboard].forEach(s => s.classList.add("hidden"));
+    [screenMenu, screenModeSelection, screenName, screenGame, screenLeaderboard, screenLeaderboardMode].forEach(s => s.classList.add("hidden"));
     document.getElementById(screenId).classList.remove("hidden");
 }
 
 document.getElementById("btn-start").addEventListener("click", () => {
+    showScreen("screen-mode-selection");
+});
+
+document.getElementById("btn-easy-mode").addEventListener("click", () => {
+    currentMode = "easy";
+    showScreen("screen-name");
+    nameInput.value = "";
+    nameInput.focus();
+});
+
+document.getElementById("btn-medium-mode").addEventListener("click", () => {
+    currentMode = "medium";
     showScreen("screen-name");
     nameInput.value = "";
     nameInput.focus();
 });
 
 document.getElementById("btn-leaderboard").addEventListener("click", () => {
+    showScreen("screen-leaderboard-mode");
+});
+
+document.getElementById("btn-easy-leaderboard").addEventListener("click", () => {
+    currentMode = "easy";
+    showScreen("screen-leaderboard");
+    loadLeaderboard();
+});
+
+document.getElementById("btn-medium-leaderboard").addEventListener("click", () => {
+    currentMode = "medium";
     showScreen("screen-leaderboard");
     loadLeaderboard();
 });
@@ -61,9 +88,11 @@ document.getElementById("btn-exit").addEventListener("click", () => {
     location.reload();
 });
 
-document.getElementById("btn-name-back").addEventListener("click", () => showScreen("screen-menu"));
+document.getElementById("btn-mode-back").addEventListener("click", () => showScreen("screen-menu"));
+document.getElementById("btn-name-back").addEventListener("click", () => showScreen("screen-mode-selection"));
 document.getElementById("btn-game-back").addEventListener("click", () => showScreen("screen-menu"));
-document.getElementById("btn-lb-back").addEventListener("click", () => showScreen("screen-menu"));
+document.getElementById("btn-lb-back").addEventListener("click", () => showScreen("screen-leaderboard-mode"));
+document.getElementById("btn-mode-lb-back").addEventListener("click", () => showScreen("screen-menu"));
 
 // Enter Key Logic
 document.getElementById("btn-join").addEventListener("click", () => startGame());
@@ -76,24 +105,27 @@ guessInput.addEventListener("keydown", (e) => { if (e.key === "Enter") handleGue
 // --- DATA LOADING ---
 async function fetchWordLists() {
     try {
-        const [answersResponse, guessesResponse] = await Promise.all([
-            fetch('./words.txt'),
+        const [easyResponse, mediumResponse, guessesResponse] = await Promise.all([
+            fetch('./Easy_mode.txt'),
+            fetch('./Medium_mode.txt'),
             fetch('./All_the_Words.txt')
         ]);
 
-        if (!answersResponse.ok || !guessesResponse.ok) {
-            throw new Error(`Files not found - answers: ${answersResponse.ok}, guesses: ${guessesResponse.ok}`);
+        if (!easyResponse.ok || !mediumResponse.ok || !guessesResponse.ok) {
+            throw new Error(`Files not found - easy: ${easyResponse.ok}, medium: ${mediumResponse.ok}, guesses: ${guessesResponse.ok}`);
         }
 
-        const answersText = await answersResponse.text();
+        const easyText = await easyResponse.text();
+        const mediumText = await mediumResponse.text();
         const guessesText = await guessesResponse.text();
 
-        answerList = answersText.split('\n').map(w => w.trim().toLowerCase()).filter(w => w && w.length === 5);
+        easyAnswerList = easyText.split('\n').map(w => w.trim().toLowerCase()).filter(w => w && w.length === 5);
+        mediumAnswerList = mediumText.split('\n').map(w => w.trim().toLowerCase()).filter(w => w && w.length === 5);
         validGuessList = guessesText.split('\n').map(w => w.trim().toLowerCase()).filter(w => w && w.length === 5);
 
-        console.log(`Loaded ${answerList.length} answer words and ${validGuessList.length} valid guess words.`);
+        console.log(`Loaded ${easyAnswerList.length} easy words, ${mediumAnswerList.length} medium words, and ${validGuessList.length} valid guess words.`);
 
-        if (answerList.length === 0 || validGuessList.length === 0) {
+        if (easyAnswerList.length === 0 || mediumAnswerList.length === 0 || validGuessList.length === 0) {
             throw new Error("No valid words found");
         }
     } catch (error) {
@@ -165,6 +197,9 @@ function updateKeyboardColors(guess, feedback) {
 
 // --- GAME LOGIC ---
 function startGame() {
+    const answerList = currentMode === "easy" ? easyAnswerList : mediumAnswerList;
+    ATTEMPTS = currentMode === "easy" ? 6 : 4;
+
     if (answerList.length === 0) {
         alert("Still loading dictionary...");
         return;
@@ -197,7 +232,7 @@ function startGame() {
 }
 
 function updatePlayerInfo() {
-    playerDisplay.textContent = `Player: ${playerName}   Attempts: ${currentAttempt + 1}/${ATTEMPTS}`;
+    playerDisplay.textContent = `Player: ${playerName}   Mode: ${currentMode.charAt(0).toUpperCase() + currentMode.slice(1)}   Attempts: ${currentAttempt + 1}/${ATTEMPTS}`;
 }
 
 async function handleGuess() {
@@ -210,6 +245,7 @@ async function handleGuess() {
         return;
     }
 
+    const answerList = currentMode === "easy" ? easyAnswerList : mediumAnswerList;
     if (!validGuessList.includes(guess) && !answerList.includes(guess)) {
         messageEl.textContent = "Word not in list.";
         return;
@@ -289,9 +325,11 @@ async function endGame(won) {
 
 async function saveScore(name, timeVal) {
     try {
-        await addDoc(collection(db, "placemate"), {
+        const collectionName = currentMode === "easy" ? "placemate_easy" : "placemate_medium";
+        await addDoc(collection(db, collectionName), {
             name: name,
             time: parseFloat(timeVal),
+            mode: currentMode,
             date: new Date().toISOString()
         });
     } catch (e) {
@@ -303,41 +341,44 @@ async function loadLeaderboard() {
     const tbody = document.getElementById("leaderboard-body");
     tbody.innerHTML = "<tr><td colspan='3'>Loading from Firebase...</td></tr>";
 
-    // Grouping by date
-    const q = query(collection(db, "placemate"), orderBy("date", "desc"));
+    //Grouping by data - use collection based on current mode
+    const collectionName = currentMode === "easy" ? "placemate_easy" : "placemate_medium";
+    const q = query(collection(db, collectionName), orderBy('date', "desc"));
     try {
         const querySnapshot = await getDocs(q);
         tbody.innerHTML = "";
+
         if (querySnapshot.empty) {
-            tbody.innerHTML = "<tr><td colspan='3'>No records yet.</td></tr>";
+            tbody.innerHTML = `<tr><td colspan='3'>No records yet for ${currentMode} mode.</td></tr>`;
             return;
         }
-        
-        // Group entries by date
-        const groupedByDate = {};
+
+        //Grouping entries by data
+        const groupedByData = {};
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             let dateStr = "-";
             if (data.date) dateStr = data.date.split('T')[0];
-            if (!groupedByDate[dateStr]) {
-                groupedByDate[dateStr] = [];
+            if (!groupedByData[dateStr]) {
+                groupedByData[dateStr] = [];
             }
-            groupedByDate[dateStr].push(data);
+            groupedByData[dateStr].push(data);
         });
-        
-        // Sort entries within each date by time
-        for (const date in groupedByDate) {
-            groupedByDate[date].sort((a, b) => a.time - b.time);
+
+        //Sort entries within each date by time
+        for (const date in groupedByData) {
+            groupedByData[date].sort((a, b) => a.time - b.time);
         }
-        
-        // Render grouped leaderboard
-        for (const date in groupedByDate) {
-            // Date header row
-            tbody.innerHTML += `<tr class="date-header"><td colspan='3'><strong>${date}</strong></td></tr>`;
-            
-            // Entries for this date
+
+        // Render grouped Leaderboard
+        for (const date in groupedByData) {
+            //Date Header row
+            tbody.innerHTML += `<tr class="date-header"><td colspan="3"><strong>${date}</strong></td></tr>`;
+
+            // Entries for this data
             let rank = 1;
-            groupedByDate[date].forEach((data) => {
+            groupedByData[date].forEach((data) => {
+                // Entry row
                 const row = `<tr>
                     <td>${rank++}</td>
                     <td>${data.name}</td>

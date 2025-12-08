@@ -1,254 +1,262 @@
 body {
-  font-family: 'Arial', sans-serif;
-  background-color: #e0e0e0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 1rem;
+    font-size: 1rem;
 }
 
 
 .window-container {
-  width: 2000px;
-  height: 1000px;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow: hidden;
+    width: 90vw;
+    max-width: 2000px;
+    height: 90vh;
+    max-height: 1000px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.25rem;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .screen {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .hidden {
-  display: none !important;
+    display: none !important;
 }
 
 /* --- MENU STYLES --- */
 .title {
-  font-size: 32px;
-  font-weight: bold;
-  margin-top: 48px;
-  margin-bottom: 48px;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
 }
 
 .menu-btn {
-  font-size: 18px;
-  width: 200px;
-  padding: 10px;
-  margin: 18px 0;
-  cursor: pointer;
-  background-color: #e1e1e1;
-  border: 1px solid #adadad;
-  border-radius: 2px;
+    font-size: 1.125rem;
+    width: 12.5rem;
+    padding: 0.625rem;
+    margin: 1.125rem 0;
+    cursor: pointer;
+    background-color: #e1e1e1;
+    border: 1px solid #adadad;
+    border-radius: 2px;
 }
 
 .menu-btn:hover {
-  background-color: #d4d4d4;
+    background-color: #d4d4d4;
 }
 
 /* --- NAME SCREEN --- */
 .big-label {
-  font-size: 20px;
-  margin-top: 50px;
-  margin-bottom: 20px;
+    font-size: 1.25rem;
+    margin-top: 3.125rem;
+    margin-bottom: 1.25rem;
 }
 
 .big-input {
-  font-size: 16px;
-  padding: 5px;
-  text-align: center;
-  width: 200px;
-  margin-bottom: 20px;
+    font-size: 1rem;
+    padding: 0.3125rem;
+    text-align: center;
+    width: 12.5rem;
+    margin-bottom: 1.25rem;
 }
 
 .action-btn {
-  font-size: 18px;
-  width: 150px;
-  padding: 8px;
-  cursor: pointer;
-  margin-bottom: 12px;
+    font-size: 1.125rem;
+    width: 9.375rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    margin-bottom: 0.75rem;
 }
 
 /* --- GAME SCREEN --- */
 .top-info {
-  text-align: center;
-  margin-bottom: 10px;
-  font-size: 14px;
+    text-align: center;
+    margin-bottom: 0.625rem;
+    font-size: 0.875rem;
 }
 
 #game-board {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
-  margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.25rem;
+    margin-bottom: 1.25rem;
 }
 
 .tile {
-  width: 50px;
-  height: 50px;
-  border: 2px solid #d3d6da;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Consolas', monospace;
-  font-size: 24px;
-  font-weight: bold;
-  background: white;
-  text-transform: uppercase;
+    width: 3.125rem;
+    height: 3.125rem;
+    border: 2px solid #d3d6da;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Consolas', monospace;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: white;
+    text-transform: uppercase;
 }
 
 /* Feedback Colors */
 .correct {
-  background-color: #6aaa64;
-  color: white;
-  border-color: #6aaa64;
+    background-color: #6aaa64;
+    color: white;
+    border-color: #6aaa64;
 }
 
 .present {
-  background-color: #c9b458;
-  color: white;
-  border-color: #c9b458;
+    background-color: #c9b458;
+    color: white;
+    border-color: #c9b458;
 }
 
 .absent {
-  background-color: #787c7e;
-  color: white;
-  border-color: #787c7e;
+    background-color: #787c7e;
+    color: white;
+    border-color: #787c7e;
 }
 
 .input-area {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 10px;
+    display: flex;
+    gap: 0.625rem;
+    justify-content: center;
+    margin-bottom: 0.625rem;
 }
 
 #guess-input {
-  font-size: 16px;
-  padding: 5px;
-  width: 100px;
-  text-align: center;
-  text-transform: uppercase;
+    font-size: 1rem;
+    padding: 0.3125rem;
+    width: 6.25rem;
+    text-align: center;
+    text-transform: uppercase;
 }
 
 #guess-btn {
-  font-size: 16px;
-  padding: 5px 15px;
-  cursor: pointer;
+    font-size: 1rem;
+    padding: 0.3125rem 0.9375rem;
+    cursor: pointer;
 }
 
 .feedback-msg {
-  color: red;
-  font-size: 13px;
-  height: 20px;
-  margin: 0;
+    color: red;
+    font-size: 0.8125rem;
+    height: 1.25rem;
+    margin: 0;
 }
 
 /* --- KEYBOARD STYLES --- */
 #keyboard-container {
-  margin-top: auto;
-  /* Push to bottom */
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
+    margin-top: auto;
+    /* Push to bottom */
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
 }
 
 .keyboard-row {
-  display: flex;
-  gap: 4px;
+    display: flex;
+    gap: 0.25rem;
 }
 
 .key-btn {
-  font-family: 'Arial', sans-serif;
-  font-weight: bold;
-  font-size: 14px;
-  height: 45px;
-  width: 35px;
-  cursor: pointer;
-  background-color: #d3d6da;
-  /* Default gray */
-  border: none;
-  border-radius: 4px;
-  color: black;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  user-select: none;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    font-size: 0.875rem;
+    height: 2.8125rem;
+    width: 2.1875rem;
+    cursor: pointer;
+    background-color: #d3d6da;
+    /* Default gray */
+    border: none;
+    border-radius: 4px;
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
 }
 
 .key-btn:active {
-  background-color: #bbb;
+    background-color: #bbb;
 }
 
 .key-btn.correct {
-  background-color: #6aaa64;
-  color: white;
+    background-color: #6aaa64;
+    color: white;
 }
 
 .key-btn.present {
-  background-color: #c9b458;
-  color: white;
+    background-color: #c9b458;
+    color: white;
 }
 
 .key-btn.absent {
-  background-color: #787c7e;
-  color: white;
+    background-color: #787c7e;
+    color: white;
 }
 
 
 /* --- LEADERBOARD --- */
 .table-wrapper {
-  width: 100%;
-  max-height: 1000px;
-  overflow-y: auto;
-  display: flex;
-  justify-content: center;
+    width: 100%;
+    max-height: 25rem;
+    overflow-y: auto;
 }
 
 table {
-  width: auto;
-  min-width: 400px;
-  border-collapse: collapse;
-  font-family: 'Consolas', monospace;
-  font-size: 13px;
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Consolas', monospace;
+    font-size: 0.8125rem;
 }
 
 th {
-  background-color: #333;
-  color: white;
-  padding: 8px;
-  text-align: left;
+    background-color: #333;
+    color: white;
+    padding: 0.5rem;
+    text-align: left;
 }
 
 td {
-  border-bottom: 1px solid #ccc;
-  padding: 6px;
+    border-bottom: 1px solid #ccc;
+    padding: 0.375rem;
 }
 
-.date-header td {
-  background-color: #8a8888;
-  color: white;
+tr.date-header {
+    background-color: #4a90e2 !important;
+}
+
+tr.date-header td {
+    background-color: #4a90e2 !important;
+    color: white !important;
+    padding: 0.75rem !important;
+    font-size: 1rem !important;
+    border: none !important;
+    font-weight: bold !important;
 }
 
 .back-btn {
-  margin-top: 12px;
-  margin-bottom: 10px;
-  font-size: 14px;
-  padding: 5px 20px;
-  cursor: pointer;
+    margin-bottom: 0.625rem;
+    font-size: 0.875rem;
+    padding: 0.3125rem 1.25rem;
+    cursor: pointer;
 }
