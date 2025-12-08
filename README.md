@@ -25,6 +25,9 @@ The game validates guesses against a dictionary of over 12,000 words to ensure g
 
 ## 🚀 Features
 
+* **Dual Difficulty Modes:**
+    * **Easy Mode:** 6 attempts.The solution is always a concrete, high-frequency noun (e.g., `APPLE`, `HOUSE`, `BEACH`).
+    * **Medium Mode:** 4 attempts.The solution is often an abstract concept, adjective, or functional grammar word (e.g., `ABOUT`, `THINK`, `WOULD`).
 * **Global Leaderboard:** Uses **Firebase Firestore** to track the fastest solve times worldwide.
 * **Speed Timer:** Tracks exactly how long it takes you to solve the puzzle.
 * **Dual Dictionary System:**
@@ -35,6 +38,31 @@ The game validates guesses against a dictionary of over 12,000 words to ensure g
     * 🟨 **Yellow:** Correct letter, wrong spot.
     * ⬜ **Gray:** Letter not in the word.
 * **Virtual Keyboard:** Updates key colors dynamically based on your guesses.
+
+---
+
+## 🏆 Leaderboard System
+
+The leaderboard logic is custom-built to highlight the fastest daily solvers.
+
+### Database Collections
+Scores are separated into two Firestore collections to maintain distinct rankings for each difficulty:
+* `placemate_easy`: Stores scores for Easy Mode (6 attempts).
+* `placemate_medium`: Stores scores for Medium Mode (4 attempts).
+
+### Data Structure
+Each score entry documents the player's performance with the following fields:
+* `name`: Player identifier (defaults to "Anonymous").
+* `time`: Float value representing seconds elapsed.
+* `mode`: The game difficulty ("easy" or "medium").
+* `date`: ISO timestamp of completion.
+
+### Ranking Algorithm
+The application uses a client-side grouping strategy to display the leaderboard:
+1.  **Query:** Fetches records from the selected mode's collection, ordered by `date` (descending).
+2.  **Group:** Iterates through the results and groups players by the specific calendar date (YYYY-MM-DD).
+3.  **Sort:** Within each date group, players are sorted by `time` (ascending).
+4.  **Rank:** The player with the lowest time in that specific day is assigned Rank #1.
 
 ---
 
@@ -53,7 +81,8 @@ The game validates guesses against a dictionary of over 12,000 words to ensure g
 | `index.html` | The main entry point containing the Game, Menu, and Leaderboard screens. |
 | `script.js` | Handles game logic, DOM manipulation, and Firebase Firestore connections. |
 | `style.css` | Custom styling for the grid, keyboard, and responsive layout. |
-| `words.txt` | The list of potential **answers** (Target words). |
+| `Easy_mode.txt` | Target word list for Easy mode (Concrete Nouns). |
+| `Medium_mode.txt` | Target word list for Medium mode (Abstract/Grammar). |
 | `All_the_Words.txt` | A large dictionary used to validate if a guess is a real English word. |
 | `firebase.json` | Configuration settings for Firebase Hosting. |
 
@@ -94,12 +123,36 @@ The game connects to a Firestore collection named `placemate`.
 
 ## 🔥 Firebase Configuration
 
-This project is configured for Firebase project `wordle-web-d8405`.
+This project is pre-configured to use Firebase Firestore for the leaderboard and Firebase Hosting.
 
-To deploy your own updates:
+### Database Logic
+The game connects to a Firestore database with two specific collections:
+* `placemate_easy`: Stores scores for Easy Mode.
+* `placemate_medium`: Stores scores for Medium Mode.
+
+### Hosting
+The project includes `firebase.json` and `.firebaserc` for easy deployment.
+
+To deploy to your own Firebase Hosting instance:
 1.  Install Firebase CLI: `npm install -g firebase-tools`
 2.  Login: `firebase login`
-3.  Deploy:
+3.  Initialize (if needed): `firebase init`
+4.  Deploy:
     ```bash
     firebase deploy
     ```
+---
+
+## 🛠 Technologies Used
+
+* **Frontend:** HTML5, CSS3, JavaScript (ES6 Modules)
+* **Backend:** Firebase Firestore (NoSQL Database)
+* **Hosting:** Firebase Hosting
+  
+---
+
+## 📝 Word Lists Credits
+
+* **Easy Mode:** Curated list of physical objects and simple verbs.
+* **Medium Mode:** Curated list of abstract concepts and grammar terms.
+* **Validation:** Full English 5-letter word dictionary.
