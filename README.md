@@ -16,11 +16,13 @@ The game validates guesses against a dictionary of over 12,000 words to ensure g
 
 ---
 * [**Features**](#-Features) - *The synopsis of the project.*
-* [**Tech Stack**](#-Tech-Stack) - *Leaderboard, Mechanics.*
+* [**Leaderboard System**](#-Leaderboard-System) - *Leaderboard logic in game.*
 * [**Project Structure**](#-Project-Structure)   - *Project Structure.* 
 * [**How to Run Locally**](#-How-to-Run-Locally) - *Run locally in firebase the game.*
-* [**Leaderboard Logic**](#-Leaderboard-Logic) - *Leaderboard logic in game.*
 * [**Firebase Configuration**](#-Firebase-Configuration) - *Commands to run the game with firebase.*
+* [**Technologies Used**](#-Technologies-Used) - *Tech stack*
+* [**Word Lists Credits**](#-Words-List-Credits) - *Words lists*
+
 ---
 
 ## 🚀 Features
@@ -63,14 +65,6 @@ The application uses a client-side grouping strategy to display the leaderboard:
 2.  **Group:** Iterates through the results and groups players by the specific calendar date (YYYY-MM-DD).
 3.  **Sort:** Within each date group, players are sorted by `time` (ascending).
 4.  **Rank:** The player with the lowest time in that specific day is assigned Rank #1.
-
----
-
-## 🛠️ Tech Stack
-
-* **Frontend:** HTML5, CSS3, Vanilla JavaScript (ES6 Modules).
-* **Backend & Database:** Firebase Firestore.
-* **Hosting:** Firebase Hosting.
 
 ---
 
