@@ -49,7 +49,7 @@ The game validates guesses against a dictionary of over 12,000 words to ensure g
 ## 🎮 Game Modes
 
 | Mode | Attempts | Word List | Special Rules |
-| :--- | :--- |
+| :--- | :--- | :--- | :--- |
 | Easy | 6 | `Easy_mode.txt` | None.Standard Wordle rules. |
 | Medium | 4 | `Medium_mode.txt` | Reduced attempts for a quicker challenge. |
 | Hard | 5 | `Hard_mode.txt` | **Strict Contraints:** Any "Correct"(Green) or "Present"(Yellow) letters revealed must be used in all subswquent quesses. |
