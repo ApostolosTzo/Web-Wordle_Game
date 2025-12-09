@@ -3,7 +3,7 @@ import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from
 
 // --- FIREBASE CONFIG ---
 const firebaseConfig = {
-    apiKey: "AIzaSyBMa-KsNVACyoIzhBqLRgwpRgVspi5Qo5g",
+    apiKey: "YOURAPIKEYHERE",
     authDomain: "wordle-web-d8405.firebaseapp.com",
     projectId: "wordle-web-d8405",
     storageBucket: "wordle-web-d8405.firebasestorage.app",
@@ -21,11 +21,17 @@ let targetWord = "";
 let startTime = 0;
 let gameOver = false;
 let playerName = "Anonymous";
-let currentMode = "easy"; // "easy" or "medium"
+let currentMode = "easy"; // "easy", "medium", or "hard"
 
 let easyAnswerList = [];
 let mediumAnswerList = [];
+let hardAnswerList = [];
 let validGuessList = [];
+
+// Hard mode tracking - stores constraints from previous guesses
+let correctLetters = {}; // { position: letter } - letters that are in correct positions
+let presentLetters = new Set(); // letters that must appear somewhere but not in their guessed position
+let previousGuesses = []; // all previous guesses
 
 // --- DOM ELEMENTS ---
 const screenMenu = document.getElementById("screen-menu");
@@ -67,6 +73,13 @@ document.getElementById("btn-medium-mode").addEventListener("click", () => {
     nameInput.focus();
 });
 
+document.getElementById("btn-hard-mode").addEventListener("click", () => {
+    currentMode = "hard";
+    showScreen("screen-name");
+    nameInput.value = "";
+    nameInput.focus();
+});
+
 document.getElementById("btn-leaderboard").addEventListener("click", () => {
     showScreen("screen-leaderboard-mode");
 });
@@ -79,6 +92,12 @@ document.getElementById("btn-easy-leaderboard").addEventListener("click", () => 
 
 document.getElementById("btn-medium-leaderboard").addEventListener("click", () => {
     currentMode = "medium";
+    showScreen("screen-leaderboard");
+    loadLeaderboard();
+});
+
+document.getElementById("btn-hard-leaderboard").addEventListener("click", () => {
+    currentMode = "hard";
     showScreen("screen-leaderboard");
     loadLeaderboard();
 });
@@ -105,32 +124,35 @@ guessInput.addEventListener("keydown", (e) => { if (e.key === "Enter") handleGue
 // --- DATA LOADING ---
 async function fetchWordLists() {
     try {
-        const [easyResponse, mediumResponse, guessesResponse] = await Promise.all([
+        const [easyResponse, mediumResponse, hardResponse, guessesResponse] = await Promise.all([
             fetch('./Easy_mode.txt'),
             fetch('./Medium_mode.txt'),
+            fetch('./Hard_mode.txt'),
             fetch('./All_the_Words.txt')
         ]);
 
-        if (!easyResponse.ok || !mediumResponse.ok || !guessesResponse.ok) {
-            throw new Error(`Files not found - easy: ${easyResponse.ok}, medium: ${mediumResponse.ok}, guesses: ${guessesResponse.ok}`);
+        if (!easyResponse.ok || !mediumResponse.ok || !hardResponse.ok || !guessesResponse.ok) {
+            throw new Error(`Files not found - easy: ${easyResponse.ok}, medium: ${mediumResponse.ok}, hard: ${hardResponse.ok}, guesses: ${guessesResponse.ok}`);
         }
 
         const easyText = await easyResponse.text();
         const mediumText = await mediumResponse.text();
+        const hardText = await hardResponse.text();
         const guessesText = await guessesResponse.text();
 
         easyAnswerList = easyText.split('\n').map(w => w.trim().toLowerCase()).filter(w => w && w.length === 5);
         mediumAnswerList = mediumText.split('\n').map(w => w.trim().toLowerCase()).filter(w => w && w.length === 5);
+        hardAnswerList = hardText.split('\n').map(w => w.trim().toLowerCase()).filter(w => w && w.length === 5);
         validGuessList = guessesText.split('\n').map(w => w.trim().toLowerCase()).filter(w => w && w.length === 5);
 
-        console.log(`Loaded ${easyAnswerList.length} easy words, ${mediumAnswerList.length} medium words, and ${validGuessList.length} valid guess words.`);
+        console.log(`Loaded ${easyAnswerList.length} easy words, ${mediumAnswerList.length} medium words, ${hardAnswerList.length} hard words, and ${validGuessList.length} valid guess words.`);
 
-        if (easyAnswerList.length === 0 || mediumAnswerList.length === 0 || validGuessList.length === 0) {
+        if (easyAnswerList.length === 0 || mediumAnswerList.length === 0 || hardAnswerList.length === 0 || validGuessList.length === 0) {
             throw new Error("No valid words found");
         }
     } catch (error) {
         console.error("Error loading word lists:", error);
-        alert("Error loading word lists. Make sure words.txt and All_the_Words.txt exist in the same directory.");
+        alert("Error loading word lists. Make sure Easy_mode.txt, Medium_mode.txt, Hard_mode.txt, and All_the_Words.txt exist in the same directory.");
     }
 }
 
@@ -197,8 +219,17 @@ function updateKeyboardColors(guess, feedback) {
 
 // --- GAME LOGIC ---
 function startGame() {
-    const answerList = currentMode === "easy" ? easyAnswerList : mediumAnswerList;
-    ATTEMPTS = currentMode === "easy" ? 6 : 4;
+    let answerList;
+    if (currentMode === "easy") {
+        answerList = easyAnswerList;
+        ATTEMPTS = 6;
+    } else if (currentMode === "medium") {
+        answerList = mediumAnswerList;
+        ATTEMPTS = 4;
+    } else if (currentMode === "hard") {
+        answerList = hardAnswerList;
+        ATTEMPTS = 5;
+    }
 
     if (answerList.length === 0) {
         alert("Still loading dictionary...");
@@ -214,6 +245,11 @@ function startGame() {
     guessInput.disabled = false;
     messageEl.textContent = "";
     board.innerHTML = "";
+
+    // Reset hard mode constraints
+    correctLetters = {};
+    presentLetters = new Set();
+    previousGuesses = [];
 
     initKeyboard();
 
@@ -245,10 +281,37 @@ async function handleGuess() {
         return;
     }
 
-    const answerList = currentMode === "easy" ? easyAnswerList : mediumAnswerList;
+    let answerList;
+    if (currentMode === "easy") {
+        answerList = easyAnswerList;
+    } else if (currentMode === "medium") {
+        answerList = mediumAnswerList;
+    } else if (currentMode === "hard") {
+        answerList = hardAnswerList;
+    }
+
     if (!validGuessList.includes(guess) && !answerList.includes(guess)) {
         messageEl.textContent = "Word not in list.";
         return;
+    }
+
+    // Hard mode constraint check
+    if (currentMode === "hard") {
+        // Check that all correct letters are in their positions
+        for (const [position, letter] of Object.entries(correctLetters)) {
+            if (guess[position] !== letter) {
+                messageEl.textContent = `Position ${parseInt(position) + 1} must be '${letter.toUpperCase()}'`;
+                return;
+            }
+        }
+
+        // Check that all present letters are included somewhere in the guess
+        for (const letter of presentLetters) {
+            if (!guess.includes(letter)) {
+                messageEl.textContent = `Your guess must include the letter '${letter.toUpperCase()}' (not in same position as before)`;
+                return;
+            }
+        }
     }
 
     messageEl.textContent = "";
@@ -256,6 +319,18 @@ async function handleGuess() {
     const feedback = getFeedback(guess, targetWord);
     renderFeedback(guess, feedback, currentAttempt);
     updateKeyboardColors(guess, feedback);
+
+    // Update hard mode constraints
+    if (currentMode === "hard") {
+        for (let i = 0; i < 5; i++) {
+            if (feedback[i] === "correct") {
+                correctLetters[i] = guess[i];
+            } else if (feedback[i] === "present") {
+                presentLetters.add(guess[i]);
+            }
+        }
+        previousGuesses.push({ guess, feedback });
+    }
 
     if (guess === targetWord) {
         endGame(true);
@@ -325,7 +400,15 @@ async function endGame(won) {
 
 async function saveScore(name, timeVal) {
     try {
-        const collectionName = currentMode === "easy" ? "placemate_easy" : "placemate_medium";
+        let collectionName;
+        if (currentMode === "easy") {
+            collectionName = "placemate_easy";
+        } else if (currentMode === "medium") {
+            collectionName = "placemate_medium";
+        } else if (currentMode === "hard") {
+            collectionName = "placemate_hard";
+        }
+
         await addDoc(collection(db, collectionName), {
             name: name,
             time: parseFloat(timeVal),
@@ -342,7 +425,15 @@ async function loadLeaderboard() {
     tbody.innerHTML = "<tr><td colspan='3'>Loading from Firebase...</td></tr>";
 
     //Grouping by data - use collection based on current mode
-    const collectionName = currentMode === "easy" ? "placemate_easy" : "placemate_medium";
+    let collectionName;
+    if (currentMode === "easy") {
+        collectionName = "placemate_easy";
+    } else if (currentMode === "medium") {
+        collectionName = "placemate_medium";
+    } else if (currentMode === "hard") {
+        collectionName = "placemate_hard";
+    }
+
     const q = query(collection(db, collectionName), orderBy('date', "desc"));
     try {
         const querySnapshot = await getDocs(q);
