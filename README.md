@@ -27,19 +27,33 @@ The game validates guesses against a dictionary of over 12,000 words to ensure g
 
 ## 🚀 Features
 
-* **Dual Difficulty Modes:**
+* **3 Difficulty Modes:**
     * **Easy Mode:** 6 attempts.The solution is always a concrete, high-frequency noun (e.g., `APPLE`, `HOUSE`, `BEACH`).
     * **Medium Mode:** 4 attempts.The solution is often an abstract concept, adjective, or functional grammar word (e.g., `ABOUT`, `THINK`, `WOULD`).
+    * **Hard Mode:** 5 attempts with **Strict Rules** (hints must be used in subsequent quesses)
 * **Global Leaderboard:** Uses **Firebase Firestore** to track the fastest solve times worldwide.
 * **Speed Timer:** Tracks exactly how long it takes you to solve the puzzle.
+* **Dual Input:** Supports both on-screen virtual keyboard and physical keyboard input.
 * **Dual Dictionary System:**
-    * **Target Words:** Randomly selects answers from a curated list (`words.txt`).
+    * **Target Words:** Randomly selects answers from a curated list.
     * **Valid Guesses:** Validates inputs against a massive dictionary of over 12,000 words (`All_the_Words.txt`) to ensure real words are used.
 * **Visual Feedback:**
     * 🟩 **Green:** Correct letter, correct spot.
     * 🟨 **Yellow:** Correct letter, wrong spot.
     * ⬜ **Gray:** Letter not in the word.
 * **Virtual Keyboard:** Updates key colors dynamically based on your guesses.
+* **Responsive Design:** Works on desktop and mobile devices.
+
+---
+
+## 🎮 Game Modes
+
+| Mode | Attempts | Word List | Special Rules |
+| :--- | :--- |
+| Easy | 6 | `Easy_mode.txt` | None.Standard Wordle rules. |
+| Medium | 4 | `Medium_mode.txt` | Reduced attempts for a quicker challenge. |
+| Hard | 5 | `Hard_mode.txt` | **Strict Contraints:** Any "Correct"(Green) or "Present"(Yellow) letters revealed must be used in all subswquent quesses. |
+
 
 ---
 
@@ -77,6 +91,7 @@ The application uses a client-side grouping strategy to display the leaderboard:
 | `style.css` | Custom styling for the grid, keyboard, and responsive layout. |
 | `Easy_mode.txt` | Target word list for Easy mode (Concrete Nouns). |
 | `Medium_mode.txt` | Target word list for Medium mode (Abstract/Grammar). |
+| `Hard_mode.txt` | Target word list for Hard mode. |
 | `All_the_Words.txt` | A large dictionary used to validate if a guess is a real English word. |
 | `firebase.json` | Configuration settings for Firebase Hosting. |
 
